@@ -1,0 +1,30 @@
+{
+  "name": "todos",
+  "version": "1.0.0",
+  "description": "Clone of all the functionalities of Ubuntu Todo App.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VineetPrasadVerma/TodoApp-JS-Postgresql-.git"
+  },
+  "author": "Vineet Prasad Verma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VineetPrasadVerma/TodoApp-JS-Postgresql-/issues"
+  },
+  "homepage": "https://github.com/VineetPrasadVerma/TodoApp-JS-Postgresql-#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "moment": "^2.24.0",
+    "pg": "^8.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
+}
