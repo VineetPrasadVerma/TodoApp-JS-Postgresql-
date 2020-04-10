@@ -2,10 +2,8 @@
   "name": "todos",
   "version": "1.0.0",
   "description": "Clone of all the functionalities of Ubuntu Todo App.",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js",
-    "start:dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -26,5 +24,7 @@
     "moment": "^2.24.0",
     "pg": "^8.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
 }
