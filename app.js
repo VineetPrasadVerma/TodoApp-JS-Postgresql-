@@ -16,10 +16,14 @@ app.get('/', (req, res) => {
   res.send('I am homepage')
 })
 
-app.get('/getAllLists', db.queriesObject.getAllLists)
-app.get('/getListById/:id', db.queriesObject.getListById)
-app.post('/createList', db.queriesObject.createList)
-app.put('/getListById/:id', db.queriesObject.updateList)
-app.delete('/getListById/:id', db.queriesObject.deleteList )
+app.get('/lists', db.queriesObject.getAllLists)
+app.get('/lists/:id', db.queriesObject.getListById)
+app.post('/lists', db.queriesObject.createList)
+app.put('/lists/:id', db.queriesObject.updateList)
+app.delete('/lists/:id', db.queriesObject.deleteList)
+
+app.get('/lists/:id/tasks', db.queriesObject.getAllTodos)
+app.post('/lists/:id/tasks', db.queriesObject.createTodo)
+app.delete('/lists/:id/tasks/:taskId', db.queriesObject.deleteTask)
 
 app.listen(port, () => console.log(`App listening on port ${port}`))
