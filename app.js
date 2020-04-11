@@ -22,7 +22,7 @@ app.post('/lists', db.queriesObject.createList)
 app.put('/lists/:id', db.queriesObject.updateList)
 app.delete('/lists/:id', db.queriesObject.deleteList)
 
-app.get('/lists/:id/tasks', db.queriesObject.getAllTasks)
+app.get('/lists/:id/tasks', db.queriesObject.getOrderedTask)
 app.post('/lists/:id/tasks', db.queriesObject.createTask)
 app.put('/lists/:id/tasks/:taskId', db.queriesObject.updateTask)
 app.delete('/lists/:id/tasks/:taskId', db.queriesObject.deleteTask)

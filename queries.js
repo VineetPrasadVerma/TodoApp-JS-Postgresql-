@@ -14,6 +14,10 @@ const queriesObject = {}
 queriesObject.getAllLists = async (req, res) => {
   try {
     const result = await pool.query('SELECT * from lists ORDER BY list_id')
+
+    // const temp = await pool.query('SELECT list_name from lists')
+    // console.log(temp.rows.map(l => l.list_name).filter(l => l.includes('B')))
+
     if (result.rowCount === 0) return res.status(200).json({ message: 'No lists present' })
     res.status(200).json(result.rows)
   } catch (e) {
@@ -120,6 +124,25 @@ queriesObject.updateTask = async (req, res) => {
   } catch (e) {
     console.log(e)
     res.status(500).json({ message: `Can't update task of ${req.params.id} id` })
+  }
+}
+
+queriesObject.getOrderedTask = async (req, res) => {
+  try {
+    const listId = Number(req.params.id)
+    const listResult = await pool.query('SELECT * FROM lists WHERE list_id =  $1', [listId])
+    if (listResult.rowCount === 0) return res.status(404).json({ message: 'List doesn\'t exist' })
+
+    const taskResult = await pool.query(`SELECT * FROM (SELECT * FROM 
+      (SELECT * FROM (SELECT * FROM tasks WHERE list_id = ${listId} ORDER BY task_id)
+        AS or_taskid ORDER BY scheduled)
+          AS or_scheduled ORDER BY priority DESC)
+            AS or_priority ORDER BY completed;`)
+
+    if (taskResult.rowCount === 0) return res.status(200).json({ message: 'No task present' })
+    res.status(200).json(taskResult.rows)
+  } catch (e) {
+    res.status(500).json({ message: 'Can\'t get tasks' })
   }
 }
 
