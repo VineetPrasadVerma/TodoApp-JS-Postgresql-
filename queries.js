@@ -70,7 +70,7 @@ queriesObject.deleteList = async (req, res) => {
   }
 }
 
-queriesObject.getAllTodos = async (req, res) => {
+queriesObject.getAllTasks = async (req, res) => {
   try {
     const listId = Number(req.params.id)
     const listResult = await pool.query('SELECT * FROM lists WHERE list_id =  $1', [listId])
@@ -85,7 +85,7 @@ queriesObject.getAllTodos = async (req, res) => {
   }
 }
 
-queriesObject.createTodo = async (req, res) => {
+queriesObject.createTask = async (req, res) => {
   try {
     const listId = req.params.id
     const taskName = req.body.taskName
@@ -101,17 +101,27 @@ queriesObject.createTodo = async (req, res) => {
   }
 }
 
-// queriesObject.updateTask = async (req, res) => {
-//   try {
-//     const listId = Number(req.params.id)
-//     const listName = req.body.listName
-//     const result = await pool.query('UPDATE LISTS SET list_name = $1 WHERE list_id = $2', [listName, listId])
-//     // console.log(result)
-//     res.status(200).send(`List modified with ID: ${listId}`)
-//   } catch (e) {
-//     res.status(500).json(e)
-//   }
-// }
+queriesObject.updateTask = async (req, res) => {
+  try {
+    const listId = Number(req.params.id)
+    const taskId = Number(req.params.taskId)
+
+    const requestBody = req.body
+    const taskField = Object.keys(requestBody)[0]
+    const taskValue = requestBody[taskField]
+
+    const listResult = await pool.query('SELECT * FROM lists WHERE list_id =  $1', [listId])
+    if (listResult.rowCount === 0) return res.status(404).json({ message: 'List doesn\'t exist' })
+
+    const result = await pool.query(`UPDATE TASKS SET ${taskField} = '${taskValue}' WHERE task_id = ${taskId} and list_id = ${listId}`)
+
+    if (result.rowCount === 0) return res.status(404).json({ message: `can't find task with id ${taskId}` })
+    res.status(200).send(`Task modified with ID: ${taskId}`)
+  } catch (e) {
+    console.log(e)
+    res.status(500).json({ message: `Can't update task of ${req.params.id} id` })
+  }
+}
 
 queriesObject.deleteTask = async (req, res) => {
   try {
