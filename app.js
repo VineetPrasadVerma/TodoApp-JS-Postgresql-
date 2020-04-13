@@ -1,7 +1,13 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+// const cors = require('cors')
+const path = require('path')
 const db = require('./queries')
 const app = express()
+
+// app.set('views', path.join(__dirname, '/views'))
+// app.engine('html', engines.mustache)
+// app.set('view engine', 'html')
 
 app.use(bodyParser.json())
 app.use(
@@ -10,10 +16,13 @@ app.use(
   })
 )
 
-const port = 3000
+// to server static file
+app.use(express.static(path.join(__dirname, 'public')))
+
+// app.use(cors())
 
 app.get('/', (req, res) => {
-  res.redirect('/lists')
+  res.render('index.html')
 })
 
 app.get('/lists', db.queriesObject.getAllLists)
@@ -27,4 +36,4 @@ app.post('/lists/:id/tasks', db.queriesObject.createTask)
 app.put('/lists/:id/tasks/:taskId', db.queriesObject.updateTask)
 app.delete('/lists/:id/tasks/:taskId', db.queriesObject.deleteTask)
 
-app.listen(port, () => console.log(`App listening on port ${port}`))
+app.listen(process.env.APP_PORT, () => console.log('Todo server has started'))

@@ -1,0 +1,78 @@
+#container{
+    width: 360px;
+    margin: 100px auto; /*Top bottom to be 0 and left and right to be auto */
+}
+
+body{
+    font-family: Sen;
+}
+
+input[type=text]{
+   width: 100%;
+   /* outline: none;
+   box-sizing: border-box; */
+}
+
+/* .active-list{
+    color: aqua;
+} */
+
+.hide{
+    display: none;
+}
+
+#listName{
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 24px;
+}
+
+#label{
+    grid-area: nlabel;
+}
+
+#textArea{
+    grid-area: notes; 
+}
+
+#scheduling{
+    grid-area: scheduling;
+    margin-top: 10px;
+}
+
+#priority{
+    grid-area: priority;
+}
+
+#task-details{
+    display: grid;
+    height: 150px;
+    margin-top: 10px;
+    border: 1px solid gray;
+    grid-column-gap: 5px;
+    padding: 5px;
+    grid-template-areas: 
+    "nlabel nlabel . ."
+    "notes notes . ."
+    "notes notes priority priority"
+    "notes notes scheduling scheduling"
+    "notes notes . ."
+    "notes notes . ."
+  
+}
+
+/* #back-button{
+    font-size: 20px;
+} */
+
+#todo-heading{
+    text-align: center;
+}
+
+#list-item:hover {
+    cursor: pointer;
+}
+
+/* #text-item:hover {
+    cursor: pointer;
+} */
