@@ -74,6 +74,19 @@ queriesObject.deleteList = async (req, res) => {
   }
 }
 
+// queriesObject.searchLists = async (req, res, text) => {
+//   try {
+//     const result = await pool.query('SELECT list_name from lists')
+//     result.rows.map(list => list.list_name).filter(list => list.includes(text)))
+
+//     if (result.rowCount === 0) return res.status(200).json({ message: 'No lists present' })
+//     res.status(200).json(result.rows)
+//   } catch (e) {
+//     // console.log(e)
+//     res.status(500).json({ message: 'Can\'t get lists' })
+//   }
+// }
+
 queriesObject.getAllTasks = async (req, res) => {
   try {
     const listId = Number(req.params.id)
