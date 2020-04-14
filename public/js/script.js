@@ -68,7 +68,7 @@ const renderLists = list => {
     'div',
     { id: list.list_id },
     createElement('span', { id: 'list-item' }, list.list_name),
-    createElement('i', { className: 'fa fa-trash', ariahidden: 'true' }),
+    createElement('i', { className: 'fa fa-trash', ariahidden: 'true', onclick: deleteList }),
     createElement('i', { className: 'fa fa-pencil-square-o', ariahidden: 'true', onclick: editList })
 
   )
@@ -76,16 +76,35 @@ const renderLists = list => {
   showListContainer.appendChild(divList)
 }
 
+const deleteList = event => {
+  const parentDiv = event.target.parentNode.parentNode
+  const childDiv = event.target.parentNode
+  // console.log(childDiv.id)
+  const reqObj = {
+    url: baseURL + `/${event.target.parentNode.id}`,
+    init: {
+      method: 'DELETE'
+    }
+  }
+  deleteListDB(reqObj)
+  parentDiv.removeChild(childDiv)
+}
+
+const deleteListDB = async (reqObj) => {
+  const deletedMessage = await fetchDB(reqObj)
+  console.log(deletedMessage)
+}
+
 const editList = event => {
   const parentDiv = event.target.parentNode
   parentDiv.childNodes[1].classList.add('hide')
   parentDiv.childNodes[2].classList.add('hide')
-  const inputElement = createElement('input', { type: 'text', focus: true, value: parentDiv.firstChild.textContent })
+  const inputElement = createElement('input', { type: 'text', value: parentDiv.firstChild.textContent })
   // const input = document.createElement('input')
   // input.type = 'text'
   // input.value = parentDiv.firstChild.textContent
   parentDiv.replaceChild(inputElement, parentDiv.firstChild)
-  // input.focus()
+  inputElement.focus()
   inputElement.addEventListener('keyup', function (event) {
     if (event.keyCode === 13) {
       // console.log(parentDiv.id)
@@ -105,7 +124,7 @@ const editList = event => {
         return
       }
 
-      updateList(reqObj)
+      updateListDB(reqObj)
 
       // console.log(event.target.parentNode.parentNode)
       // reset(event.target.parentNode.parentNode)
@@ -136,13 +155,13 @@ const load = async () => {
 
 load()
 
-const addNewList = async (reqObj) => {
+const addNewListDB = async (reqObj) => {
   const newList = await fetchDB(reqObj)
   renderLists(newList[0])
   // lists.push(newList[0])
 }
 
-const updateList = async (reqObj) => {
+const updateListDB = async (reqObj) => {
   const updatedList = await fetchDB(reqObj)
 }
 
@@ -167,7 +186,7 @@ addListInput.addEventListener('keyup', function (event) {
       }
     }
     // console.log(reqObj.url)
-    addNewList(reqObj)
+    addNewListDB(reqObj)
 
     this.value = ''
     addListInput.placeholder = ' Search | Add Lists'
