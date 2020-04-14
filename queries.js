@@ -42,7 +42,7 @@ queriesObject.createList = async (req, res) => {
     const listName = req.body.listName
     const result = await pool.query('INSERT INTO LISTS (list_name) VALUES ($1) RETURNING list_id', [listName])
     // console.log(result)
-    res.status(201).send(`List added with Id ${result.rows[0].list_id} `)
+    res.status(201).json({ message: `List added with Id ${result.rows[0].list_id} ` })
   } catch (e) {
     res.status(500).json({ message: 'Can\'t add list' })
   }
@@ -55,7 +55,7 @@ queriesObject.updateList = async (req, res) => {
     const result = await pool.query('UPDATE LISTS SET list_name = $1 WHERE list_id = $2', [listName, listId])
     // console.log(result)
     if (result.rowCount === 0) return res.status(404).json({ message: `can't find list with id ${listId}` })
-    res.status(200).send(`List modified with ID: ${listId}`)
+    res.status(200).json({ message: `List modified with ID: ${listId}` })
   } catch (e) {
     res.status(500).json({ message: `Can't update list of ${req.params.id} id` })
   }
@@ -67,7 +67,7 @@ queriesObject.deleteList = async (req, res) => {
     const result = await pool.query('DELETE FROM lists WHERE list_id =  $1', [listId])
 
     if (result.rowCount === 0) return res.status(404).json({ message: `can't find list with id ${listId}` })
-    res.status(200).send(`List deleted with ID: ${listId}`)
+    res.status(200).json({ message: `List deleted with ID: ${listId}` })
   } catch (e) {
     // console.log(e)
     res.status(500).json({ message: `Can't delete list of ${req.params.id} id` })
