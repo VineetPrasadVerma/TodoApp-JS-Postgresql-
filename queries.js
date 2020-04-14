@@ -40,9 +40,8 @@ queriesObject.getListById = async (req, res) => {
 queriesObject.createList = async (req, res) => {
   try {
     const listName = req.body.listName
-    const result = await pool.query('INSERT INTO LISTS (list_name) VALUES ($1) RETURNING list_id', [listName])
-    // console.log(result)
-    res.status(201).json({ message: `List added with Id ${result.rows[0].list_id} ` })
+    const result = await pool.query('INSERT INTO LISTS (list_name) VALUES ($1) RETURNING *', [listName])
+    res.status(201).json(result.rows)
   } catch (e) {
     res.status(500).json({ message: 'Can\'t add list' })
   }
