@@ -76,3 +76,17 @@ input[type=text]{
 /* #text-item:hover {
     cursor: pointer;
 } */
+
+#show-lists-container > div{
+    padding: 5px;
+}
+
+.fa-trash{
+    float:right; 
+}
+
+.fa-pencil-square-o{
+    float:right; 
+    padding-right:10px
+}
+
