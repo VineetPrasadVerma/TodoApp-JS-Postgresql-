@@ -17,11 +17,12 @@ queriesObject.getAllLists = async (req, res) => {
 
     // const temp = await pool.query('SELECT list_name from lists')
     // console.log(temp.rows.map(l => l.list_name).filter(l => l.includes('B')))
-
-    if (result.rowCount === 0) return res.status(200).json({ message: 'No lists present' })
+    // console.log(result)
+    if (result.rowCount === 0) return res.status(200).json({ rowCount: result.rowCount, message: 'No lists present' })
     res.status(200).json(result.rows)
   } catch (e) {
     // console.log(e)
+    // console.log('query')
     res.status(500).json({ message: 'Can\'t get lists' })
   }
 }
