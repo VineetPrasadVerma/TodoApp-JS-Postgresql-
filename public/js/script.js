@@ -8,7 +8,7 @@ const backButton = document.querySelector('#back-button')
 // const lists = window.fetch('http://127.0.0.1:3000/lists').then(res => res.json()).catch(err => console.log(err)).then(data => console.log(data))
 // console.log(lists)
 
-// const selectedList = []
+let selectedListId = 0
 let lists = []
 
 const baseURL = '/lists'
@@ -65,6 +65,11 @@ const addNewListDB = async (reqObj) => {
 
   lists.push(newList[0])
   renderLists(newList[0])
+}
+
+const addNewTaskDB = async (reqObj) => {
+  const newTask = await fetchDB(reqObj)
+  renderTask(newTask[0])
 }
 
 const readListsDB = async (reqObj) => {
@@ -132,6 +137,32 @@ addListInput.addEventListener('keyup', function (event) {
 
     this.value = ''
     addListInput.placeholder = ' Search | Add Lists'
+    // reset(addListInput.nextElementSibling)
+  }
+})
+
+addTaskInput.addEventListener('keyup', function (event) {
+  if (event.keyCode === 13) {
+    event.preventDefault()
+
+    if (this.value === '') {
+      addTaskInput.placeholder = ' Can\'t add empty task'
+      return
+    }
+
+    const reqObj = {
+      url: baseURL + '/' + selectedListId + '/tasks',
+      init: {
+        method: 'POST',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({ taskName: event.target.value })
+      }
+    }
+
+    addNewTaskDB(reqObj)
+
+    this.value = ''
+    addTaskInput.placeholder = ' Search | Add Tasks'
     // reset(addListInput.nextElementSibling)
   }
 })
@@ -244,6 +275,8 @@ const getTasks = async (listId) => {
 }
 
 const loadTask = async event => {
+  selectedListId = event.target.parentNode.id
+
   event.target.parentNode.parentNode.parentNode.classList.add('hide')
   document.getElementById('todo-heading').classList.add('hide')
   document.querySelector('#tasks-container').classList.remove('hide')

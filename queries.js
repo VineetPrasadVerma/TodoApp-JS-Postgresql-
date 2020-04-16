@@ -111,9 +111,9 @@ queriesObject.createTask = async (req, res) => {
     const listResult = await pool.query('SELECT * FROM lists WHERE list_id =  $1', [listId])
     if (listResult.rowCount === 0) return res.status(404).json({ message: 'List doesn\'t exist' })
 
-    const result = await pool.query('INSERT INTO TASKS (task_name, list_id) VALUES ($1, $2) RETURNING task_id', [taskName, listId])
+    const result = await pool.query('INSERT INTO TASKS (task_name, list_id) VALUES ($1, $2) RETURNING *', [taskName, listId])
 
-    res.status(201).send(`Task added with Id ${result.rows[0].task_id} `)
+    res.status(201).send(result.rows)
   } catch (e) {
     res.status(500).json({ message: 'Can\'t add task' })
   }
