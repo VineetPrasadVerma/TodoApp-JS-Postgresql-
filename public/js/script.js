@@ -104,6 +104,14 @@ const updateListDB = async (reqObj) => {
   lists = await fetchDB(tempReqObj)
 }
 
+const updateTaskDB = async (reqObj) => {
+  await fetchDB(reqObj)
+}
+
+const deleteTaskDB = async (reqObj) => {
+  await fetchDB(reqObj)
+}
+
 const searchList = event => {
   addListInput.placeholder = ' Search | Add Lists'
   const searchedList = lists.filter(list => list.list_name.toLowerCase().includes(event.target.value.toLowerCase()))
@@ -287,8 +295,62 @@ const loadTask = async event => {
 }
 
 const expandTask = (event) => { console.log(event.target.parentNode.id) }
-const editTask = (event) => { console.log(event.target.parentNode.id) }
-const deleteTask = (event) => { console.log(event.target.parentNode.id) }
+
+const editTask = (event) => {
+  const parentDiv = event.target.parentNode
+
+  for (let i = 0; i < 5; i++) {
+    parentDiv.childNodes[i].classList.add('hide')
+  }
+
+  const taskInput = createElement('input', { type: 'text', value: parentDiv.childNodes[1].textContent })
+
+  parentDiv.appendChild(taskInput)
+  taskInput.focus()
+
+  taskInput.addEventListener('keyup', function (event) {
+    if (event.keyCode === 13) {
+      if (this.value === '') {
+        taskInput.placeholder = 'Can\'t add empty task'
+        return
+      }
+
+      // updateTask(listId, parentDiv.id, { name: this.value })
+      const reqObj = {
+        url: baseURL + '/' + selectedListId + '/tasks/' + parentDiv.id,
+        init: {
+          method: 'PUT',
+          headers: { 'Content-type': 'application/json' },
+          body: JSON.stringify({ task_name: event.target.value })
+        }
+      }
+
+      updateTaskDB(reqObj)
+
+      parentDiv.removeChild(taskInput)
+      parentDiv.childNodes[1].textContent = this.value
+
+      for (let i = 0; i < 5; i++) {
+        parentDiv.childNodes[i].classList.remove('hide')
+      }
+    }
+  })
+}
+
+const deleteTask = (event) => {
+  const parentDiv = event.target.parentNode.parentNode
+  const childDiv = event.target.parentNode
+  const reqObj = {
+    url: baseURL + '/' + selectedListId + '/tasks/' + childDiv.id,
+    init: {
+      method: 'DELETE'
+    }
+  }
+
+  deleteTaskDB(reqObj)
+  parentDiv.removeChild(childDiv)
+}
+
 const clearCompletedTask = (event) => { console.log('Inside clear completed task') }
 
 const renderTask = task => {

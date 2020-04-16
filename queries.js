@@ -134,9 +134,8 @@ queriesObject.updateTask = async (req, res) => {
     const result = await pool.query(`UPDATE TASKS SET ${taskField} = '${taskValue}' WHERE task_id = ${taskId} and list_id = ${listId}`)
 
     if (result.rowCount === 0) return res.status(404).json({ message: `can't find task with id ${taskId}` })
-    res.status(200).send(`Task modified with ID: ${taskId}`)
+    res.status(200).send({ message: `Task modified with ID: ${taskId}` })
   } catch (e) {
-    console.log(e)
     res.status(500).json({ message: `Can't update task of ${req.params.id} id` })
   }
 }
@@ -168,7 +167,7 @@ queriesObject.deleteTask = async (req, res) => {
     const result = await pool.query('DELETE FROM tasks WHERE task_id =  $1 AND list_id = $2', [taskId, listId])
     if (result.rowCount === 0) return res.status(404).json({ message: `can't find task with id ${taskId}` })
 
-    res.status(200).send(`Task deleted with ID: ${taskId}`)
+    res.status(200).send({ message: `Task deleted with ID: ${taskId}` })
   } catch (e) {
     res.status(500).json({ message: `Can't delete task of id ${req.params.taskId}` })
   }
