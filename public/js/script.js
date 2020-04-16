@@ -162,7 +162,7 @@ const editList = event => {
 
       updateListDB(reqObj)
 
-      const spanElement = createElement('span', { id: 'list-item', onclick: renderTask }, this.value)
+      const spanElement = createElement('span', { id: 'list-item', onclick: renderTasks }, this.value)
       parentDiv.replaceChild(spanElement, parentDiv.firstChild)
 
       parentDiv.childNodes[1].classList.remove('hide')
@@ -211,7 +211,7 @@ const renderLists = list => {
   const divList = createElement(
     'div',
     { id: list.list_id },
-    createElement('span', { id: 'list-item', onclick: renderTask }, list.list_name),
+    createElement('span', { id: 'list-item', onclick: renderTasks }, list.list_name),
     createElement('i', { className: 'fa fa-trash', ariahidden: 'true', onclick: deleteList }),
     createElement('i', { className: 'fa fa-pencil-square-o', ariahidden: 'true', onclick: editList })
   )
@@ -219,6 +219,114 @@ const renderLists = list => {
   showListContainer.appendChild(divList)
 }
 
-const renderTask = () => {
+document.getElementById('back-button').onclick = (event) => {
+  document.querySelector('#tasks-container').classList.add('hide')
+  document.getElementById('todo-heading').classList.remove('hide')
 
+  reset(showTaskContainer)
+  load()
+}
+
+const getTasks = async (listId) => {
+  const reqObj = {
+    url: baseURL + '/' + listId + '/tasks',
+    init: {
+      method: 'GET'
+    }
+  }
+
+  const tasks = await fetchDB(reqObj)
+  if (tasks != null && tasks.rowCount !== 0) return tasks
+  return null
+}
+
+const expandTask = (event) => { console.log(event.target.parentNode.id) }
+const editTask = (event) => { console.log(event.target.parentNode.id) }
+const deleteTask = (event) => { console.log(event.target.parentNode.id) }
+
+const renderTasks = async (event) => {
+  event.target.parentNode.parentNode.parentNode.classList.add('hide')
+  document.getElementById('todo-heading').classList.add('hide')
+  document.querySelector('#tasks-container').classList.remove('hide')
+
+  // document.getElementById('clear-task-button').onclick = event => clearCompletedTask(event, selectedList)
+
+  const tasks = await getTasks(event.target.parentNode.id)
+  if (!tasks) return
+
+  tasks.forEach(task => {
+    const taskCheckbox = createElement('input', { id: 'input', type: 'checkbox', checked: task.completed })
+    const taskNameSpan = createElement('span', { id: 'task-item' }, task.task_name)
+    const expandIcon = createElement('i', { id: 'task-expand-icon', className: 'fa fa-arrow-circle-down', ariahidden: 'true' })
+    const trashIcon = createElement('i', { id: 'task-trash-icon', className: 'fa fa-trash', ariahidden: 'true' })
+    const editIcon = createElement('i', { id: 'task-edit-icon', className: 'fa fa-pencil-square-o', ariahidden: 'true' })
+
+    const divTask = createElement('div', { id: task.task_id }, taskCheckbox, taskNameSpan, expandIcon, trashIcon, editIcon)
+    // const divElement = document.createElement('div')
+    showTaskContainer.appendChild(divTask)
+
+    // const input = document.createElement('input')
+    // input.type = 'checkbox'
+    // input.checked = task.completed
+    // divElement.appendChild(input)
+
+    // const span = document.createElement('span')
+    // span.textContent = task.name
+    // span.id = 'text-item'
+    // divElement.appendChild(span)
+
+    // const span1 = document.createElement('span')
+    // const span2 = document.createElement('span')
+    // const span3 = document.createElement('span')
+    // span1.innerHTML = '<i style="float:right; padding-right:10px" class="fa fa-pencil-square-o" aria-hidden="true"></i>'
+    // span2.innerHTML = '<i style="float:right; padding-right:10px" class="fa fa-trash" aria-hidden="true"></i>'
+    // span3.innerHTML = '<i style="float:right;" class="fa fa-arrow-circle-down" aria-hidden="true"></i>'
+
+    // divElement.appendChild(span3)
+    // divElement.appendChild(span2)
+    // divElement.appendChild(span1)
+
+    // const expandIcon = document.getElementById('task-expand-icon')
+    expandIcon.onclick = event => expandTask(event, event.target.parentNode.id, task)
+
+    // const trashIcon = document.getElementById('task-trash-icon')
+    trashIcon.onclick = event => deleteTask(event, event.target.parentNode.id)
+
+    // const editIcon = document.getElementById('task-edit-icon')
+    editIcon.onclick = event => editTask(event, event.target.parentNode.id)
+
+    if (task.priority === '3') expandIcon.style.color = 'red'
+    if (task.priority === '2') expandIcon.style.color = 'orange'
+    if (task.priority === '1') expandIcon.style.color = 'green'
+
+    // console.log(input)
+    if (taskCheckbox.checked) {
+      taskNameSpan.style.textDecoration = 'line-through'
+      taskNameSpan.style.color = 'grey'
+
+      // document.getElementById('clear-task-button').style.pointerEvents = ''
+      // document.getElementById('clear-task-button').style.color = ''
+
+      expandIcon.classList.add('completed-task')
+      trashIcon.classList.add('completed-task')
+      editIcon.classList.add('completed-task')
+    }
+
+    taskCheckbox.onclick = (event) => {
+      console.log(event.target.parentNode)
+      if (taskCheckbox.checked) {
+        taskNameSpan.style.color = 'grey'
+        taskNameSpan.style.textDecoration = 'line-through'
+      } else {
+        taskNameSpan.style.color = ''
+        taskNameSpan.style.textDecoration = 'none'
+      }
+
+      // updateTask(selectedList.id, event.target.parentNode.id, { completed: input.checked })
+    }
+
+    // span1.setAttribute('onclick', 'editSelectedTaskOnClick(event, ' + selectedList.id + ')')
+    // span2.setAttribute('onclick', 'deleteSelectedTaskOnClick(event, ' + selectedList.id + ')')
+    // span3.onclick = event => { expandTask(event, selectedList.id, task) }
+  })
 }

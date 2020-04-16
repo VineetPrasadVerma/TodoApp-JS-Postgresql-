@@ -9,19 +9,13 @@ body{
 
 input[type=text]{
    width: 100%;
-   /* outline: none;
-   box-sizing: border-box; */
 }
-
-/* .active-list{
-    color: aqua;
-} */
 
 .hide{
     display: none;
 }
 
-#listName{
+#taskHeader{
     text-align: center;
     margin-bottom: 25px;
     font-size: 24px;
@@ -61,10 +55,6 @@ input[type=text]{
   
 }
 
-/* #back-button{
-    font-size: 20px;
-} */
-
 #todo-heading{
     text-align: center;
 }
@@ -72,10 +62,6 @@ input[type=text]{
 #list-item:hover {
     cursor: pointer;
 }
-
-/* #text-item:hover {
-    cursor: pointer;
-} */
 
 #show-lists-container > div{
     padding: 5px;
@@ -90,3 +76,32 @@ input[type=text]{
     padding-right:10px
 }
 
+#back-button{
+    float:left;
+}
+
+#clear-task-button{
+    float:right; 
+    color:gray; 
+    pointer-Events:none;
+}
+
+#task-edit-icon{
+    float:right; padding-right:10px
+}
+#task-trash-icon{
+    float:right; padding-right:10px
+}
+
+#task-expand-icon{
+    float:right;
+}
+
+.completed-task{
+    color:gray; 
+    pointer-Events:none;
+}
+
+#show-tasks-container > div{
+    padding: 5px;
+}

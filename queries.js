@@ -153,7 +153,7 @@ queriesObject.getOrderedTask = async (req, res) => {
           AS or_scheduled ORDER BY priority DESC)
             AS or_priority ORDER BY completed;`)
 
-    if (taskResult.rowCount === 0) return res.status(200).json({ message: 'No task present' })
+    if (taskResult.rowCount === 0) return res.status(200).json({ rowCount: taskResult.rowCount, message: 'No task present' })
     res.status(200).json(taskResult.rows)
   } catch (e) {
     res.status(500).json({ message: 'Can\'t get tasks' })
