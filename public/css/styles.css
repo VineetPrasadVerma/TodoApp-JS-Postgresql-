@@ -25,7 +25,7 @@ input[type=text]{
     grid-area: nlabel;
 }
 
-#textArea{
+#notes{
     grid-area: notes; 
 }
 

@@ -145,33 +145,6 @@ addListInput.addEventListener('keyup', function (event) {
 
     this.value = ''
     addListInput.placeholder = ' Search | Add Lists'
-    // reset(addListInput.nextElementSibling)
-  }
-})
-
-addTaskInput.addEventListener('keyup', function (event) {
-  if (event.keyCode === 13) {
-    event.preventDefault()
-
-    if (this.value === '') {
-      addTaskInput.placeholder = ' Can\'t add empty task'
-      return
-    }
-
-    const reqObj = {
-      url: baseURL + '/' + selectedListId + '/tasks',
-      init: {
-        method: 'POST',
-        headers: { 'Content-type': 'application/json' },
-        body: JSON.stringify({ taskName: event.target.value })
-      }
-    }
-
-    addNewTaskDB(reqObj)
-
-    this.value = ''
-    addTaskInput.placeholder = ' Search | Add Tasks'
-    // reset(addListInput.nextElementSibling)
   }
 })
 
@@ -284,6 +257,7 @@ const getTasks = async (listId) => {
 
 const loadTask = async event => {
   selectedListId = event.target.parentNode.id
+  document.getElementById('listName').textContent = event.target.parentNode.textContent
 
   event.target.parentNode.parentNode.parentNode.classList.add('hide')
   document.getElementById('todo-heading').classList.add('hide')
@@ -294,7 +268,67 @@ const loadTask = async event => {
   tasks.forEach(task => renderTask(task))
 }
 
-const expandTask = (event) => { console.log(event.target.parentNode.id) }
+addTaskInput.addEventListener('keyup', function (event) {
+  if (event.keyCode === 13) {
+    event.preventDefault()
+
+    if (this.value === '') {
+      addTaskInput.placeholder = ' Can\'t add empty task'
+      return
+    }
+
+    const reqObj = {
+      url: baseURL + '/' + selectedListId + '/tasks',
+      init: {
+        method: 'POST',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({ taskName: event.target.value })
+      }
+    }
+
+    addNewTaskDB(reqObj)
+
+    this.value = ''
+    addTaskInput.placeholder = ' Search | Add Tasks'
+  }
+})
+
+const expandTask = (event, listId, task) => {
+  const parentDiv = event.target.parentNode
+
+  if (parentDiv.querySelector('#task-details')) {
+    parentDiv.removeChild(parentDiv.lastChild)
+    return
+  }
+
+  const labelSpan = createElement('span', { id: 'label' }, 'Notes:')
+  const textareaText = createElement('textarea', { id: 'notes', textContent: task.note })
+  const schedulingInput = createElement('input', { id: 'scheduling', type: 'date', value: task.scheduled })
+  const selectList = createElement('select', { id: 'priority' })
+
+  const priorityArr = ['None', 'Low', 'Medium', 'High']
+  for (let i = 0; i < priorityArr.length; i++) {
+    const optionElement = createElement('option', { value: i, text: priorityArr[i] })
+    selectList.appendChild(optionElement)
+  }
+
+  selectList.value = task.priority
+
+  const taskDetailsContainer = createElement('div', { id: 'task-details' }, labelSpan, textareaText, schedulingInput, selectList)
+  parentDiv.appendChild(taskDetailsContainer)
+
+  textareaText.onchange = (event) => console.log(task.task_id)
+
+  schedulingInput.onchange = (event) => {
+    if (event.target.value === '') {
+      // updateTask(listId, parentDiv.id, { scheduled: '9999-99-99' })
+    } else {
+      // updateTask(listId, parentDiv.id, { scheduled: event.target.value })
+    }
+  }
+
+  // selectList.onchange = (event) => updateTask(listId, parentDiv.id, { priority: event.target.value })
+}
 
 const editTask = (event) => {
   const parentDiv = event.target.parentNode
@@ -315,7 +349,6 @@ const editTask = (event) => {
         return
       }
 
-      // updateTask(listId, parentDiv.id, { name: this.value })
       const reqObj = {
         url: baseURL + '/' + selectedListId + '/tasks/' + parentDiv.id,
         init: {
@@ -387,7 +420,6 @@ const renderTask = task => {
   }
 
   taskCheckbox.onclick = (event) => {
-    // console.log(event.target.parentNode)
     if (taskCheckbox.checked) {
       taskNameSpan.style.color = 'grey'
       taskNameSpan.style.textDecoration = 'line-through'
