@@ -5,12 +5,12 @@ const showListContainer = document.querySelector('#show-lists-container')
 const showTaskContainer = document.querySelector('#show-tasks-container')
 const clearTaskButton = document.querySelector('#clear-task-button')
 const backButton = document.querySelector('#back-button')
+
 // const lists = window.fetch('http://127.0.0.1:3000/lists').then(res => res.json()).catch(err => console.log(err)).then(data => console.log(data))
 // console.log(lists)
 
 let selectedListId = 0
 let lists = []
-
 const baseURL = '/lists'
 
 const fetchDB = async (reqObj) => {
@@ -62,7 +62,7 @@ const createElement = (type, props, ...children) => {
 
 const addNewListDB = async (reqObj) => {
   const newList = await fetchDB(reqObj)
-
+  // console.log(lists)
   lists.push(newList[0])
   renderLists(newList[0])
 }
@@ -114,6 +114,7 @@ const deleteTaskDB = async (reqObj) => {
 
 const searchList = event => {
   addListInput.placeholder = ' Search | Add Lists'
+  if (!lists.length) return
   const searchedList = lists.filter(list => list.list_name.toLowerCase().includes(event.target.value.toLowerCase()))
   reset(showListContainer)
   searchedList.forEach(list => renderLists(list))
@@ -212,9 +213,16 @@ const load = async () => {
     }
   }
 
-  lists = await readListsDB(reqObj)
+  const listsDB = await readListsDB(reqObj)
+  console.log(listsDB.rowCount)
+
+  if (!listsDB.rowCount === 0) {
+    console.log('indies')
+    lists = listsDB
+    listsDB.forEach(list => renderLists(list))
+  }
   // console.log(lists)
-  if (lists != null && lists.rowCount !== 0) lists.forEach(list => renderLists(list))
+  // { if (lists != null && lists.rowCount !== 0) lists.forEach(list => renderLists(list)) }
 }
 
 load()
@@ -268,6 +276,13 @@ const loadTask = async event => {
   tasks.forEach(task => renderTask(task))
 }
 
+const renderUpdatedOrderOfTask = async () => {
+  reset(showTaskContainer)
+  const tasks = await getTasks(selectedListId)
+  if (!tasks) return
+  tasks.forEach(task => renderTask(task))
+}
+
 addTaskInput.addEventListener('keyup', function (event) {
   if (event.keyCode === 13) {
     event.preventDefault()
@@ -293,7 +308,7 @@ addTaskInput.addEventListener('keyup', function (event) {
   }
 })
 
-const expandTask = (event, listId, task) => {
+const expandTask = (event, task) => {
   const parentDiv = event.target.parentNode
 
   if (parentDiv.querySelector('#task-details')) {
@@ -302,7 +317,7 @@ const expandTask = (event, listId, task) => {
   }
 
   const labelSpan = createElement('span', { id: 'label' }, 'Notes:')
-  const textareaText = createElement('textarea', { id: 'notes', textContent: task.note })
+  const textareaTextBox = createElement('textarea', { id: 'notes', textContent: task.note })
   const schedulingInput = createElement('input', { id: 'scheduling', type: 'date', value: task.scheduled })
   const selectList = createElement('select', { id: 'priority' })
 
@@ -314,20 +329,55 @@ const expandTask = (event, listId, task) => {
 
   selectList.value = task.priority
 
-  const taskDetailsContainer = createElement('div', { id: 'task-details' }, labelSpan, textareaText, schedulingInput, selectList)
+  const taskDetailsContainer = createElement('div', { id: 'task-details' }, labelSpan, textareaTextBox, schedulingInput, selectList)
   parentDiv.appendChild(taskDetailsContainer)
 
-  textareaText.onchange = (event) => console.log(task.task_id)
-
-  schedulingInput.onchange = (event) => {
-    if (event.target.value === '') {
-      // updateTask(listId, parentDiv.id, { scheduled: '9999-99-99' })
-    } else {
-      // updateTask(listId, parentDiv.id, { scheduled: event.target.value })
+  textareaTextBox.onchange = (event) => {
+    const reqObj = {
+      url: baseURL + '/' + selectedListId + '/tasks/' + task.task_id,
+      init: {
+        method: 'PUT',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({ note: event.target.value })
+      }
     }
+
+    updateTaskDB(reqObj)
   }
 
-  // selectList.onchange = (event) => updateTask(listId, parentDiv.id, { priority: event.target.value })
+  schedulingInput.onchange = async (event) => {
+    const reqObj = {
+      url: baseURL + '/' + selectedListId + '/tasks/' + task.task_id,
+      init: {
+        method: 'PUT',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({ scheduled: event.target.value })
+      }
+    }
+
+    if (event.target.value === '') {
+      reqObj.init.body = JSON.stringify({ scheduled: '9999-99-99' })
+      await updateTaskDB(reqObj)
+    } else {
+      await updateTaskDB(reqObj)
+    }
+
+    renderUpdatedOrderOfTask()
+  }
+
+  selectList.onchange = async (event) => {
+    const reqObj = {
+      url: baseURL + '/' + selectedListId + '/tasks/' + task.task_id,
+      init: {
+        method: 'PUT',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({ priority: event.target.value })
+      }
+    }
+
+    await updateTaskDB(reqObj)
+    renderUpdatedOrderOfTask()
+  }
 }
 
 const editTask = (event) => {
@@ -390,22 +440,16 @@ const renderTask = task => {
   const taskCheckbox = createElement('input', { id: 'input', type: 'checkbox', checked: task.completed })
   const taskNameSpan = createElement('span', { id: 'task-item' }, task.task_name)
   const expandIcon = createElement('i', { id: 'task-expand-icon', className: 'fa fa-arrow-circle-down', ariahidden: 'true' })
-  const trashIcon = createElement('i', { id: 'task-trash-icon', className: 'fa fa-trash', ariahidden: 'true' })
-  const editIcon = createElement('i', { id: 'task-edit-icon', className: 'fa fa-pencil-square-o', ariahidden: 'true' })
+  const trashIcon = createElement('i', { id: 'task-trash-icon', className: 'fa fa-trash', ariahidden: 'true', onclick: deleteTask })
+  const editIcon = createElement('i', { id: 'task-edit-icon', className: 'fa fa-pencil-square-o', ariahidden: 'true', onclick: editTask })
 
   const divTask = createElement('div', { id: task.task_id }, taskCheckbox, taskNameSpan, expandIcon, trashIcon, editIcon)
 
   showTaskContainer.appendChild(divTask)
 
-  expandIcon.onclick = event => expandTask(event, event.target.parentNode.id, task)
-
-  trashIcon.onclick = event => deleteTask(event, event.target.parentNode.id)
-
-  editIcon.onclick = event => editTask(event, event.target.parentNode.id)
-
-  if (task.priority === '3') expandIcon.style.color = 'red'
-  if (task.priority === '2') expandIcon.style.color = 'orange'
-  if (task.priority === '1') expandIcon.style.color = 'green'
+  if (task.priority === 3) expandIcon.style.color = 'red'
+  if (task.priority === 2) expandIcon.style.color = 'orange'
+  if (task.priority === 1) expandIcon.style.color = 'green'
 
   if (taskCheckbox.checked) {
     taskNameSpan.style.textDecoration = 'line-through'
@@ -419,15 +463,19 @@ const renderTask = task => {
     editIcon.classList.add('completed-task')
   }
 
-  taskCheckbox.onclick = (event) => {
-    if (taskCheckbox.checked) {
-      taskNameSpan.style.color = 'grey'
-      taskNameSpan.style.textDecoration = 'line-through'
-    } else {
-      taskNameSpan.style.color = ''
-      taskNameSpan.style.textDecoration = 'none'
+  expandIcon.onclick = event => expandTask(event, task)
+
+  taskCheckbox.onclick = async (event) => {
+    const reqObj = {
+      url: baseURL + '/' + selectedListId + '/tasks/' + task.task_id,
+      init: {
+        method: 'PUT',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({ completed: taskCheckbox.checked })
+      }
     }
 
-    // updateTask(selectedList.id, event.target.parentNode.id, { completed: input.checked })
+    await updateTaskDB(reqObj)
+    renderUpdatedOrderOfTask()
   }
 }

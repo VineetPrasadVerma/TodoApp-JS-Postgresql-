@@ -136,6 +136,7 @@ queriesObject.updateTask = async (req, res) => {
     if (result.rowCount === 0) return res.status(404).json({ message: `can't find task with id ${taskId}` })
     res.status(200).send({ message: `Task modified with ID: ${taskId}` })
   } catch (e) {
+    console.log(e)
     res.status(500).json({ message: `Can't update task of ${req.params.id} id` })
   }
 }
