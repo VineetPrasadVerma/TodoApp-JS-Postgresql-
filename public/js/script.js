@@ -117,6 +117,10 @@ const deleteTaskDB = async (reqObj) => {
   await fetchDB(reqObj)
 }
 
+const deleteCompletedTasksDB = async (reqObj) => {
+  await fetchDB(reqObj)
+}
+
 const searchList = event => {
   addListInput.placeholder = ' Search | Add Lists'
   if (!lists.length) return
@@ -256,7 +260,7 @@ backButton.onclick = (event) => {
   load()
 }
 
-clearTaskButton.onclick = event => clearCompletedTask(event)
+clearTaskButton.onclick = event => clearCompletedTask()
 
 const getTasks = async (listId) => {
   const reqObj = {
@@ -442,7 +446,17 @@ const deleteTask = (event) => {
   parentDiv.removeChild(childDiv)
 }
 
-const clearCompletedTask = (event) => { console.log('Inside clear completed task') }
+const clearCompletedTask = async () => {
+  const reqObj = {
+    url: baseURL + '/' + selectedListId + '/tasks/',
+    init: {
+      method: 'DELETE'
+    }
+  }
+
+  await deleteCompletedTasksDB(reqObj)
+  renderUpdatedOrderOfTask()
+}
 
 const renderTask = task => {
   const taskCheckbox = createElement('input', { id: 'input', type: 'checkbox', checked: task.completed })
@@ -459,16 +473,19 @@ const renderTask = task => {
   if (task.priority === 2) expandIcon.style.color = 'orange'
   if (task.priority === 1) expandIcon.style.color = 'green'
 
-  if (taskCheckbox.checked) {
+  if (task.completed) {
     taskNameSpan.style.textDecoration = 'line-through'
     taskNameSpan.style.color = 'grey'
 
-    clearTaskButton.style.pointerEvents = ''
-    clearTaskButton.style.color = ''
+    clearTaskButton.style.pointerEvents = 'auto'
+    clearTaskButton.style.color = 'black'
 
     expandIcon.classList.add('completed-task')
     trashIcon.classList.add('completed-task')
     editIcon.classList.add('completed-task')
+  } else {
+    clearTaskButton.style.pointerEvents = 'none'
+    clearTaskButton.style.color = 'grey'
   }
 
   expandIcon.onclick = event => expandTask(event, task)

@@ -174,4 +174,18 @@ queriesObject.deleteTask = async (req, res) => {
   }
 }
 
+queriesObject.deleteCompletedTasks = async (req, res) => {
+  try {
+    // const taskId = Number(req.params.taskId)
+    const listId = Number(req.params.id)
+
+    const result = await pool.query('DELETE FROM tasks WHERE completed = true and list_id = $1', [listId])
+    if (result.rowCount === 0) return res.status(404).json({ message: 'Don\'t have any completed task' })
+
+    res.status(200).send({ message: 'Tasks Deleted' })
+  } catch (e) {
+    res.status(500).json({ message: 'Can\'t delete tasks ' })
+  }
+}
+
 module.exports = { queriesObject }

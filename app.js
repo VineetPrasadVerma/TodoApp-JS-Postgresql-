@@ -35,5 +35,6 @@ app.get('/lists/:id/tasks', db.queriesObject.getOrderedTask)
 app.post('/lists/:id/tasks', db.queriesObject.createTask)
 app.put('/lists/:id/tasks/:taskId', db.queriesObject.updateTask)
 app.delete('/lists/:id/tasks/:taskId', db.queriesObject.deleteTask)
+app.delete('/lists/:id/tasks/', db.queriesObject.deleteCompletedTasks)
 
 app.listen(process.env.APP_PORT, () => console.log('Todo server has started'))
