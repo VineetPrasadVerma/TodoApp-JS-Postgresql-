@@ -73,8 +73,13 @@ const addNewTaskDB = async (reqObj) => {
 }
 
 const readListsDB = async (reqObj) => {
-  const lists = await fetchDB(reqObj)
-  return lists
+  const listsDB = await fetchDB(reqObj)
+
+  if (!(listsDB.rowCount === 0)) {
+    lists = listsDB
+  }
+
+  return listsDB
 }
 
 const deleteListDB = async (reqObj) => {
@@ -87,7 +92,7 @@ const deleteListDB = async (reqObj) => {
     }
   }
 
-  lists = await fetchDB(tempReqObj)
+  await readListsDB(tempReqObj)
   // console.log(deletedMessage)
 }
 
@@ -101,7 +106,7 @@ const updateListDB = async (reqObj) => {
     }
   }
 
-  lists = await fetchDB(tempReqObj)
+  await readListsDB(tempReqObj)
 }
 
 const updateTaskDB = async (reqObj) => {
@@ -126,12 +131,14 @@ addListInput.addEventListener('keyup', function (event) {
   if (event.keyCode === 13) {
     event.preventDefault()
 
-    load()
+    // load()
 
     if (this.value === '') {
       addListInput.placeholder = ' Can\'t add empty list'
       return
     }
+
+    load()
 
     const reqObj = {
       url: baseURL + '/',
@@ -214,13 +221,14 @@ const load = async () => {
   }
 
   const listsDB = await readListsDB(reqObj)
-  console.log(listsDB.rowCount)
+  // console.log(listsDB.rowCount)
 
-  if (!listsDB.rowCount === 0) {
-    console.log('indies')
-    lists = listsDB
+  if (!(listsDB.rowCount === 0)) {
+    // console.log('inside')
+    // lists = listsDB
     listsDB.forEach(list => renderLists(list))
   }
+
   // console.log(lists)
   // { if (lists != null && lists.rowCount !== 0) lists.forEach(list => renderLists(list)) }
 }
