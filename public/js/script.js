@@ -77,6 +77,8 @@ const readListsDB = async (reqObj) => {
 
   if (!(listsDB.rowCount === 0)) {
     lists = listsDB
+  } else {
+    lists = []
   }
 
   return listsDB
@@ -208,7 +210,7 @@ const deleteList = async event => {
     }
   }
 
-  deleteListDB(reqObj)
+  await deleteListDB(reqObj)
   parentDiv.removeChild(childDiv)
 }
 
