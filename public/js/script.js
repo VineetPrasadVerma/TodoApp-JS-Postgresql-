@@ -20,13 +20,12 @@ const fetchDB = async (reqObj) => {
 
     // console.log(res, data)
     if (res.status === 200 || res.status === 201) {
-      // console.log('vin', data)
       return data
     } else if (res.status === 500) {
-      // showError(res.status, data)
+      showError(res.status, data)
       return null
     } else if (res.status === 404) {
-      // showError(res.status, data)
+      showError(res.status, data)
       return null
     }
   } catch (error) {
@@ -36,13 +35,14 @@ const fetchDB = async (reqObj) => {
   }
 }
 
-// const showError = async (status, data) => {
-//   topContainer.classList.add('hide')
+const showError = (status, data) => {
+  topContainer.classList.add('hide')
 
-//   const errorTag = document.getElementById('error')
-//   errorTag.style.fontsize = '100px'
-//   errorTag.textContent = status + data.message
-// }
+  const errorTag = document.getElementById('error')
+  errorTag.classList.remove('hide')
+
+  errorTag.textContent = status + ' : ' + data.message
+}
 
 const reset = element => {
   while (element.firstChild) {
@@ -60,28 +60,24 @@ const createElement = (type, props, ...children) => {
   return dom
 }
 
+const readListsDB = async (reqObj) => {
+  const listsDB = await fetchDB(reqObj)
+  if (listsDB != null && listsDB.rowCount !== 0) {
+    lists = listsDB
+    return listsDB
+  } else {
+    lists = []
+    return null
+  }
+}
+
 const addNewListDB = async (reqObj) => {
   const newList = await fetchDB(reqObj)
   // console.log(lists)
-  lists.push(newList[0])
-  renderLists(newList[0])
-}
-
-const addNewTaskDB = async (reqObj) => {
-  const newTask = await fetchDB(reqObj)
-  renderTask(newTask[0])
-}
-
-const readListsDB = async (reqObj) => {
-  const listsDB = await fetchDB(reqObj)
-
-  if (!(listsDB.rowCount === 0)) {
-    lists = listsDB
-  } else {
-    lists = []
+  if (newList) {
+    lists.push(newList[0])
+    renderLists(newList[0])
   }
-
-  return listsDB
 }
 
 const deleteListDB = async (reqObj) => {
@@ -111,6 +107,17 @@ const updateListDB = async (reqObj) => {
   await readListsDB(tempReqObj)
 }
 
+const readTasksDB = async (reqObj) => {
+  const tasks = await fetchDB(reqObj)
+  if (tasks != null && tasks.rowCount !== 0) return tasks
+  return null
+}
+
+const addNewTaskDB = async (reqObj) => {
+  const newTask = await fetchDB(reqObj)
+  if (newTask) renderTask(newTask[0])
+}
+
 const updateTaskDB = async (reqObj) => {
   await fetchDB(reqObj)
 }
@@ -131,7 +138,7 @@ const searchList = event => {
   searchedList.forEach(list => renderLists(list))
 }
 
-addListInput.addEventListener('keyup', function (event) {
+addListInput.addEventListener('keyup', async function (event) {
   searchList(event)
 
   if (event.keyCode === 13) {
@@ -155,7 +162,7 @@ addListInput.addEventListener('keyup', function (event) {
       }
     }
 
-    addNewListDB(reqObj)
+    await addNewListDB(reqObj)
 
     this.value = ''
     addListInput.placeholder = ' Search | Add Lists'
@@ -187,7 +194,7 @@ const editList = event => {
         return
       }
 
-      updateListDB(reqObj)
+      await updateListDB(reqObj)
 
       const spanElement = createElement('span', { id: 'list-item', onclick: loadTask }, this.value)
       parentDiv.replaceChild(spanElement, parentDiv.firstChild)
@@ -226,13 +233,13 @@ const load = async () => {
     }
   }
 
-  const listsDB = await readListsDB(reqObj)
+  const lists = await readListsDB(reqObj)
   // console.log(listsDB.rowCount)
 
-  if (!(listsDB.rowCount === 0)) {
+  if (lists) {
     // console.log('inside')
     // lists = listsDB
-    listsDB.forEach(list => renderLists(list))
+    lists.forEach(list => renderLists(list))
   }
 
   // console.log(lists)
@@ -264,19 +271,6 @@ backButton.onclick = (event) => {
 
 clearTaskButton.onclick = event => clearCompletedTask()
 
-const getTasks = async (listId) => {
-  const reqObj = {
-    url: baseURL + '/' + listId + '/tasks',
-    init: {
-      method: 'GET'
-    }
-  }
-
-  const tasks = await fetchDB(reqObj)
-  if (tasks != null && tasks.rowCount !== 0) return tasks
-  return null
-}
-
 const loadTask = async event => {
   selectedListId = event.target.parentNode.id
   document.getElementById('listName').textContent = event.target.parentNode.textContent
@@ -285,14 +279,29 @@ const loadTask = async event => {
   document.getElementById('todo-heading').classList.add('hide')
   document.querySelector('#tasks-container').classList.remove('hide')
 
-  const tasks = await getTasks(event.target.parentNode.id)
+  const reqObj = {
+    url: baseURL + '/' + event.target.parentNode.id + '/tasks',
+    init: {
+      method: 'GET'
+    }
+  }
+
+  const tasks = await readTasksDB(reqObj)
   if (!tasks) return
   tasks.forEach(task => renderTask(task))
 }
 
 const renderUpdatedOrderOfTask = async () => {
   reset(showTaskContainer)
-  const tasks = await getTasks(selectedListId)
+
+  const reqObj = {
+    url: baseURL + '/' + selectedListId + '/tasks',
+    init: {
+      method: 'GET'
+    }
+  }
+
+  const tasks = await readTasksDB(reqObj)
   if (!tasks) return
   tasks.forEach(task => renderTask(task))
 }
@@ -346,7 +355,7 @@ const expandTask = (event, task) => {
   const taskDetailsContainer = createElement('div', { id: 'task-details' }, labelSpan, textareaTextBox, schedulingInput, selectList)
   parentDiv.appendChild(taskDetailsContainer)
 
-  textareaTextBox.onchange = (event) => {
+  textareaTextBox.onchange = async (event) => {
     const reqObj = {
       url: baseURL + '/' + selectedListId + '/tasks/' + task.task_id,
       init: {
@@ -356,7 +365,7 @@ const expandTask = (event, task) => {
       }
     }
 
-    updateTaskDB(reqObj)
+    await updateTaskDB(reqObj)
   }
 
   schedulingInput.onchange = async (event) => {
@@ -406,7 +415,7 @@ const editTask = (event) => {
   parentDiv.appendChild(taskInput)
   taskInput.focus()
 
-  taskInput.addEventListener('keyup', function (event) {
+  taskInput.addEventListener('keyup', async function (event) {
     if (event.keyCode === 13) {
       if (this.value === '') {
         taskInput.placeholder = 'Can\'t add empty task'
@@ -422,7 +431,7 @@ const editTask = (event) => {
         }
       }
 
-      updateTaskDB(reqObj)
+      await updateTaskDB(reqObj)
 
       parentDiv.removeChild(taskInput)
       parentDiv.childNodes[1].textContent = this.value
@@ -434,7 +443,7 @@ const editTask = (event) => {
   })
 }
 
-const deleteTask = (event) => {
+const deleteTask = async (event) => {
   const parentDiv = event.target.parentNode.parentNode
   const childDiv = event.target.parentNode
   const reqObj = {
@@ -444,7 +453,7 @@ const deleteTask = (event) => {
     }
   }
 
-  deleteTaskDB(reqObj)
+  await deleteTaskDB(reqObj)
   parentDiv.removeChild(childDiv)
 }
 

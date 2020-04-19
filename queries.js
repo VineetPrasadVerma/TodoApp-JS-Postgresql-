@@ -19,11 +19,12 @@ queriesObject.getAllLists = async (req, res) => {
     // console.log(temp.rows.map(l => l.list_name).filter(l => l.includes('B')))
     // console.log(result)
     if (result.rowCount === 0) return res.status(200).json({ rowCount: result.rowCount, message: 'No lists present' })
+    // console.log(result)
     res.status(200).json(result.rows)
   } catch (e) {
     // console.log(e)
     // console.log('query')
-    res.status(500).json({ message: 'Can\'t get lists' })
+    res.status(500).json({ rowCount: 0, message: 'Can\'t get lists' })
   }
 }
 
