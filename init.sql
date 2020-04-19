@@ -6,7 +6,7 @@ CREATE TABLE lists(
 CREATE TABLE tasks(
     task_id serial PRIMARY KEY,
     task_name VARCHAR(255) NOT NULL,
-    scheduled VARCHAR(255) DEFAULT '9999-99-99',
+    scheduled VARCHAR(255),
     completed boolean DEFAULT FALSE,
     priority INTEGER DEFAULT 0,
     note text,

@@ -370,7 +370,7 @@ const expandTask = (event, task) => {
     }
 
     if (event.target.value === '') {
-      reqObj.init.body = JSON.stringify({ scheduled: '9999-99-99' })
+      reqObj.init.body = JSON.stringify({ scheduled: null })
       await updateTaskDB(reqObj)
     } else {
       await updateTaskDB(reqObj)
