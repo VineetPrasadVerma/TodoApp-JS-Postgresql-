@@ -35,31 +35,6 @@ const fetchDB = async (reqObj) => {
   }
 }
 
-const showError = (status, data) => {
-  topContainer.classList.add('hide')
-
-  const errorTag = document.getElementById('error')
-  errorTag.classList.remove('hide')
-
-  errorTag.textContent = status + ' : ' + data.message
-}
-
-const reset = element => {
-  while (element.firstChild) {
-    element.removeChild(element.firstChild)
-  }
-}
-
-const createElement = (type, props, ...children) => {
-  const dom = document.createElement(type)
-  if (props) Object.assign(dom, props)
-  for (const child of children) {
-    if (typeof child !== 'string') dom.appendChild(child)
-    else dom.appendChild(document.createTextNode(child))
-  }
-  return dom
-}
-
 const readListsDB = async (reqObj) => {
   const listsDB = await fetchDB(reqObj)
   if (listsDB != null && listsDB.rowCount !== 0) {
@@ -128,6 +103,12 @@ const deleteTaskDB = async (reqObj) => {
 
 const deleteCompletedTasksDB = async (reqObj) => {
   await fetchDB(reqObj)
+}
+
+const reset = element => {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild)
+  }
 }
 
 const searchList = event => {
@@ -237,13 +218,8 @@ const load = async () => {
   // console.log(listsDB.rowCount)
 
   if (lists) {
-    // console.log('inside')
-    // lists = listsDB
     lists.forEach(list => renderLists(list))
   }
-
-  // console.log(lists)
-  // { if (lists != null && lists.rowCount !== 0) lists.forEach(list => renderLists(list)) }
 }
 
 load()
@@ -261,34 +237,51 @@ const renderLists = list => {
   showListContainer.appendChild(divList)
 }
 
-backButton.onclick = (event) => {
-  document.querySelector('#tasks-container').classList.add('hide')
-  document.getElementById('todo-heading').classList.remove('hide')
+const renderTask = task => {
+  const taskCheckbox = createElement('input', { id: 'input', type: 'checkbox', checked: task.completed })
+  const taskNameSpan = createElement('span', { id: 'task-item' }, task.task_name)
+  const expandIcon = createElement('i', { id: 'task-expand-icon', className: 'fa fa-arrow-circle-down', ariahidden: 'true' })
+  const trashIcon = createElement('i', { id: 'task-trash-icon', className: 'fa fa-trash', ariahidden: 'true', onclick: deleteTask })
+  const editIcon = createElement('i', { id: 'task-edit-icon', className: 'fa fa-pencil-square-o', ariahidden: 'true', onclick: editTask })
 
-  reset(showTaskContainer)
-  load()
-}
+  const divTask = createElement('div', { id: task.task_id }, taskCheckbox, taskNameSpan, expandIcon, trashIcon, editIcon)
 
-clearTaskButton.onclick = event => clearCompletedTask()
+  showTaskContainer.appendChild(divTask)
 
-const loadTask = async event => {
-  selectedListId = event.target.parentNode.id
-  document.getElementById('listName').textContent = event.target.parentNode.textContent
+  if (task.priority === 3) expandIcon.style.color = 'red'
+  if (task.priority === 2) expandIcon.style.color = 'orange'
+  if (task.priority === 1) expandIcon.style.color = 'green'
 
-  event.target.parentNode.parentNode.parentNode.classList.add('hide')
-  document.getElementById('todo-heading').classList.add('hide')
-  document.querySelector('#tasks-container').classList.remove('hide')
+  if (task.completed) {
+    taskNameSpan.style.textDecoration = 'line-through'
+    taskNameSpan.style.color = 'grey'
 
-  const reqObj = {
-    url: baseURL + '/' + event.target.parentNode.id + '/tasks',
-    init: {
-      method: 'GET'
-    }
+    clearTaskButton.style.pointerEvents = 'auto'
+    clearTaskButton.style.color = 'black'
+
+    expandIcon.classList.add('completed-task')
+    trashIcon.classList.add('completed-task')
+    editIcon.classList.add('completed-task')
+  } else {
+    clearTaskButton.style.pointerEvents = 'none'
+    clearTaskButton.style.color = 'grey'
   }
 
-  const tasks = await readTasksDB(reqObj)
-  if (!tasks) return
-  tasks.forEach(task => renderTask(task))
+  expandIcon.onclick = event => expandTask(event, task)
+
+  taskCheckbox.onclick = async (event) => {
+    const reqObj = {
+      url: baseURL + '/' + selectedListId + '/tasks/' + task.task_id,
+      init: {
+        method: 'PUT',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({ completed: taskCheckbox.checked })
+      }
+    }
+
+    await updateTaskDB(reqObj)
+    renderUpdatedOrderOfTask()
+  }
 }
 
 const renderUpdatedOrderOfTask = async () => {
@@ -306,7 +299,7 @@ const renderUpdatedOrderOfTask = async () => {
   tasks.forEach(task => renderTask(task))
 }
 
-addTaskInput.addEventListener('keyup', function (event) {
+addTaskInput.addEventListener('keyup', async function (event) {
   if (event.keyCode === 13) {
     event.preventDefault()
 
@@ -324,7 +317,8 @@ addTaskInput.addEventListener('keyup', function (event) {
       }
     }
 
-    addNewTaskDB(reqObj)
+    await addNewTaskDB(reqObj)
+    renderUpdatedOrderOfTask()
 
     this.value = ''
     addTaskInput.placeholder = ' Search | Add Tasks'
@@ -379,7 +373,7 @@ const expandTask = (event, task) => {
     }
 
     if (event.target.value === '') {
-      reqObj.init.body = JSON.stringify({ scheduled: null })
+      reqObj.init.body = JSON.stringify({ scheduled: 'null' })
       await updateTaskDB(reqObj)
     } else {
       await updateTaskDB(reqObj)
@@ -457,6 +451,26 @@ const deleteTask = async (event) => {
   parentDiv.removeChild(childDiv)
 }
 
+const loadTask = async event => {
+  selectedListId = event.target.parentNode.id
+  document.getElementById('listName').textContent = event.target.parentNode.textContent
+
+  event.target.parentNode.parentNode.parentNode.classList.add('hide')
+  document.getElementById('todo-heading').classList.add('hide')
+  document.querySelector('#tasks-container').classList.remove('hide')
+
+  const reqObj = {
+    url: baseURL + '/' + event.target.parentNode.id + '/tasks',
+    init: {
+      method: 'GET'
+    }
+  }
+
+  const tasks = await readTasksDB(reqObj)
+  if (!tasks) return
+  tasks.forEach(task => renderTask(task))
+}
+
 const clearCompletedTask = async () => {
   const reqObj = {
     url: baseURL + '/' + selectedListId + '/tasks/',
@@ -469,49 +483,31 @@ const clearCompletedTask = async () => {
   renderUpdatedOrderOfTask()
 }
 
-const renderTask = task => {
-  const taskCheckbox = createElement('input', { id: 'input', type: 'checkbox', checked: task.completed })
-  const taskNameSpan = createElement('span', { id: 'task-item' }, task.task_name)
-  const expandIcon = createElement('i', { id: 'task-expand-icon', className: 'fa fa-arrow-circle-down', ariahidden: 'true' })
-  const trashIcon = createElement('i', { id: 'task-trash-icon', className: 'fa fa-trash', ariahidden: 'true', onclick: deleteTask })
-  const editIcon = createElement('i', { id: 'task-edit-icon', className: 'fa fa-pencil-square-o', ariahidden: 'true', onclick: editTask })
+backButton.onclick = (event) => {
+  document.querySelector('#tasks-container').classList.add('hide')
+  document.getElementById('todo-heading').classList.remove('hide')
 
-  const divTask = createElement('div', { id: task.task_id }, taskCheckbox, taskNameSpan, expandIcon, trashIcon, editIcon)
+  reset(showTaskContainer)
+  load()
+}
 
-  showTaskContainer.appendChild(divTask)
+clearTaskButton.onclick = event => clearCompletedTask()
 
-  if (task.priority === 3) expandIcon.style.color = 'red'
-  if (task.priority === 2) expandIcon.style.color = 'orange'
-  if (task.priority === 1) expandIcon.style.color = 'green'
+const showError = (status, data) => {
+  topContainer.classList.add('hide')
 
-  if (task.completed) {
-    taskNameSpan.style.textDecoration = 'line-through'
-    taskNameSpan.style.color = 'grey'
+  const errorTag = document.getElementById('error')
+  errorTag.classList.remove('hide')
 
-    clearTaskButton.style.pointerEvents = 'auto'
-    clearTaskButton.style.color = 'black'
+  errorTag.textContent = status + ' : ' + data.message
+}
 
-    expandIcon.classList.add('completed-task')
-    trashIcon.classList.add('completed-task')
-    editIcon.classList.add('completed-task')
-  } else {
-    clearTaskButton.style.pointerEvents = 'none'
-    clearTaskButton.style.color = 'grey'
+const createElement = (type, props, ...children) => {
+  const dom = document.createElement(type)
+  if (props) Object.assign(dom, props)
+  for (const child of children) {
+    if (typeof child !== 'string') dom.appendChild(child)
+    else dom.appendChild(document.createTextNode(child))
   }
-
-  expandIcon.onclick = event => expandTask(event, task)
-
-  taskCheckbox.onclick = async (event) => {
-    const reqObj = {
-      url: baseURL + '/' + selectedListId + '/tasks/' + task.task_id,
-      init: {
-        method: 'PUT',
-        headers: { 'Content-type': 'application/json' },
-        body: JSON.stringify({ completed: taskCheckbox.checked })
-      }
-    }
-
-    await updateTaskDB(reqObj)
-    renderUpdatedOrderOfTask()
-  }
+  return dom
 }
