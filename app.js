@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require('express')
 // const bodyParser = require('body-parser')
 // const cors = require('cors')
@@ -18,7 +20,7 @@ const app = express()
 //   })
 // )
 
-//
+// gives the functionality of bodyParser
 app.use(express.json())
 
 // to server static file
