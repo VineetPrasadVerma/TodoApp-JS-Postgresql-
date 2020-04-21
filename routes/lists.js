@@ -1,20 +1,20 @@
 const express = require('express')
 const router = express.Router()
-const { queriesObject } = require('../queries')
+const { listQueries } = require('../controllers/lists')
 
 // INDEX ROUTE
-router.get('/', queriesObject.getAllLists)
+router.get('/', listQueries.getAllLists)
 
 // READ ROUTE
-router.get('/:id', queriesObject.getListById)
+router.get('/:id', listQueries.getListById)
 
 // CREATE ROUTE
-router.post('/', queriesObject.createList)
+router.post('/', listQueries.createList)
 
 // UPDATE ROUTE
-router.put('/:id', queriesObject.updateList)
+router.put('/:id', listQueries.updateList)
 
 // DELETE ROUTE
-router.delete('/:id', queriesObject.deleteList)
+router.delete('/:id', listQueries.deleteList)
 
 module.exports = router

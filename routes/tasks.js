@@ -1,20 +1,20 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true })
-const { queriesObject } = require('../queries')
+const { taskQueries } = require('../controllers/tasks')
 
 // INDEX ROUTE
-router.get('/', queriesObject.getOrderedTask)
+router.get('/', taskQueries.getOrderedTask)
 
 // CREATE ROUTE
-router.post('/', queriesObject.createTask)
+router.post('/', taskQueries.createTask)
 
 // UPDATE ROUTE
-router.put('/:taskId', queriesObject.updateTask)
+router.put('/:taskId', taskQueries.updateTask)
 
 // DELETE ROUTE
-router.delete('/:taskId', queriesObject.deleteTask)
+router.delete('/:taskId', taskQueries.deleteTask)
 
 // DELETE MORE THAN ONE ROUTE
-router.delete('/', queriesObject.deleteCompletedTasks)
+router.delete('/', taskQueries.deleteCompletedTasks)
 
 module.exports = router
