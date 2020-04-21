@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "start:dev": "nodemon app.js",
+    "heroku-postbuild": "npm install --production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
