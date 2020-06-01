@@ -93,6 +93,7 @@ const addNewTaskDB = async (reqObj) => {
   if (newTask) renderTask(newTask[0])
 }
 
+// common
 const updateTaskDB = async (reqObj) => {
   await fetchDB(reqObj)
 }

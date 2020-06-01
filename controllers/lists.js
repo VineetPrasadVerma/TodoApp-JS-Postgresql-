@@ -67,4 +67,4 @@ listQueries.deleteList = async (req, res) => {
   }
 }
 
-module.exports = { listQueries }
+module.exports = listQueries

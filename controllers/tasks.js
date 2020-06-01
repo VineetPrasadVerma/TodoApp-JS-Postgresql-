@@ -61,11 +61,13 @@ taskQueries.getOrderedTask = async (req, res) => {
     const listResult = await pool.query('SELECT * FROM lists WHERE list_id =  $1', [listId])
     if (listResult.rowCount === 0) return res.status(404).json({ message: 'List doesn\'t exist' })
 
-    const taskResult = await pool.query(`SELECT * FROM (SELECT * FROM 
-        (SELECT * FROM (SELECT * FROM tasks WHERE list_id = ${listId} ORDER BY task_id)
-          AS or_taskid ORDER BY scheduled)
-            AS or_scheduled ORDER BY priority DESC)
-              AS or_priority ORDER BY completed;`)
+    // const taskResult = await pool.query(`SELECT * FROM (SELECT * FROM
+    //     (SELECT * FROM (SELECT * FROM tasks WHERE list_id = ${listId} ORDER BY task_id)
+    //       AS or_taskid ORDER BY scheduled)
+    //         AS or_scheduled ORDER BY priority DESC)
+    //           AS or_priority ORDER BY completed;`)
+
+    const taskResult = await pool.query(`SELECT * FROM tasks where list_id = ${listId} ORDER BY completed, priority DESC, scheduled, task_id;`)
 
     if (taskResult.rowCount === 0) return res.status(200).json({ rowCount: taskResult.rowCount, message: 'No task present' })
     res.status(200).json(taskResult.rows)

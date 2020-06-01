@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const express = require('express')
 // const bodyParser = require('body-parser')
-const cors = require('cors')
+// const cors = require('cors')
 const path = require('path')
 const listRoutes = require('./routes/lists')
 const taskRoutes = require('./routes/tasks')
@@ -26,7 +26,7 @@ app.use(express.json())
 // to server static file
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use(cors())
+// app.use(cors())
 
 // app.get('/', (req, res) => {
 //   res.render('index.html')

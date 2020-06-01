@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { listQueries } = require('../controllers/lists')
+const listQueries = require('../controllers/lists')
 
 // INDEX ROUTE
 router.get('/', listQueries.getAllLists)
